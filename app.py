@@ -1,12 +1,14 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, request
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 db = SQLAlchemy(app)
@@ -64,11 +66,19 @@ class Sale(db.Model):
 def add_user():
     email = request.json['email']
     password = request.json['password']
-    user = User(email=email, password=password)
-    db.session.add(user)
-    db.session.commit()
-    return {"message": f'User {user.email} added.'}, 201
+    confirm_password = request.json['confirm_password']
 
+    if (password != confirm_password):
+        return {"message": 'The passwords provided are different'}, 400
+    
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        user = User(email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return {"message": f'User {user.email} added.'}, 201
+    else: 
+        return {"message": 'User already exists'}, 409
 
 # creating tables in the database
 # with app.app_context():
