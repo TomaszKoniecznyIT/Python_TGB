@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -58,3 +58,13 @@ class Sale(db.Model):
 
     def __repr__(self) -> str:
         return f'Day: {self.day} total: {self.total}'
+
+
+@app.route('/users/signup', methods=['POST'])
+def add_user():
+    email = request.json['email']
+    password = request.json['password']
+    user = User(email=email, password=password)
+    db.session.add(user)
+    db.session.commit()
+    return {"message": f'User {user.email} added.'}, 201
