@@ -28,3 +28,33 @@ class User(db.Model):
     
     def __repr__(self) -> str:
         return f'User email: {self.email} password: {self.password_hash}'
+    
+
+class Shop(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    shop_code = db.Column(db.String(15), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self) -> str:
+        return f'Shop: {self.name}'
+
+
+class Target(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    month = db.Column(db.DateTime, nullable=False)
+    target = db.Column(db.Float,nullable=False)
+    id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
+
+    def __repr__(self) -> str:
+        return f'Target: {self.target} Month: {self.month}'
+
+
+class Sale(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    day = db.Column(db.DateTime, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+    id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
+
+    def __repr__(self) -> str:
+        return f'Day: {self.day} total: {self.total}'
