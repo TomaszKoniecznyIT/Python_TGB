@@ -28,6 +28,9 @@ class User(db.Model):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
     
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
     def __repr__(self) -> str:
         return f'User email: {self.email} password: {self.password_hash}'
     
@@ -79,6 +82,20 @@ def add_user():
         return {"message": f'User {user.email} added.'}, 201
     else: 
         return {"message": 'User already exists'}, 409
+
+
+@app.route('/users/login', methods=['POST'])
+def login_user():
+    email = request.json['email']
+    password = request.json['password']
+
+    user = User.query.filter_by(email=email).first()
+    passed = user.verify_password(password)
+
+    
+    return {"message": f'Password check: {passed}'}, 200
+
+
 
 # creating tables in the database
 # with app.app_context():
