@@ -68,3 +68,9 @@ def add_user():
     db.session.add(user)
     db.session.commit()
     return {"message": f'User {user.email} added.'}, 201
+
+
+# creating tables in the database
+# with app.app_context():
+    # from app import db
+    # db.create_all()
