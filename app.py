@@ -1,9 +1,12 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request
+from flask import Flask, request, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+from datetime import datetime, timedelta
+from functools import wraps
 
 load_dotenv()
 
@@ -11,7 +14,22 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+
 db = SQLAlchemy(app)
+
+
+def token_requifed(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return {"message": "Token is missing!"}
+        try:
+            payload = jwt.decode(token, app.config["SECRET_KEY"])
+        except:
+            return {"message": "Invalid Token!"}
+    return decorated
 
 
 # user model with password hashing
@@ -91,9 +109,19 @@ def login_user():
 
     user = User.query.filter_by(email=email).first()
     passed = user.verify_password(password)
+    
+    if user is not None and passed:
+        session['logged_in'] = True
+        token = jwt.encode({
+            'user': email,
+            'expiration' : str(datetime.utcnow() + timedelta(seconds=120))
+        },
+            app.config['SECRET_KEY'])
+        return {'message':"Unable to verify", 'token': token.decode('utf-8')}, 200
+    else:
+        return {'message':"Unable to verify"}, 403 
 
     
-    return {"message": f'Password check: {passed}'}, 200
 
 
 
