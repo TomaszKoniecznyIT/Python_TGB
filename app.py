@@ -19,7 +19,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 
 
-def token_requifed(func):
+def token_required(func):
     @wraps(func)
     def decorated(*args, **kwargs):
         token = request.args.get('token')
@@ -117,7 +117,7 @@ def login_user():
             'expiration' : str(datetime.utcnow() + timedelta(seconds=120))
         },
             app.config['SECRET_KEY'])
-        return {'message':"Unable to verify", 'token': token.decode('utf-8')}, 200
+        return {'message':"The token is generated", 'token': token}, 200
     else:
         return {'message':"Unable to verify"}, 403 
 
