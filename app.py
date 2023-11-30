@@ -37,6 +37,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120),unique=True, nullable=False)
     password_hash = db.Column(db.String(360), nullable=False)
+    is_manager = db.Column(db.Boolean, nullable=False, default=True)
 
     @property
     def password(self):
@@ -111,9 +112,9 @@ def login_user():
     passed = user.verify_password(password)
     
     if user is not None and passed:
-        session['logged_in'] = True
         token = jwt.encode({
             'user': email,
+            'is_manager': user.is_manager,
             'expiration' : str(datetime.utcnow() + timedelta(seconds=120))
         },
             app.config['SECRET_KEY'])
