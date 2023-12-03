@@ -22,13 +22,14 @@ db = SQLAlchemy(app)
 def token_required(func):
     @wraps(func)
     def decorated(*args, **kwargs):
-        token = request.args.get('token')
+        token = request.headers.get('Authorization')    
         if not token:
             return {"message": "Token is missing!"}
         try:
-            payload = jwt.decode(token, app.config["SECRET_KEY"])
+            payload = jwt.decode(token.split(' ')[1], app.config["SECRET_KEY"],algorithms='HS256')           
         except:
             return {"message": "Invalid Token!"}
+        return func(*args, **kwargs)
     return decorated
 
 
@@ -115,13 +116,39 @@ def login_user():
         token = jwt.encode({
             'user': email,
             'is_manager': user.is_manager,
-            'expiration' : str(datetime.utcnow() + timedelta(seconds=120))
+            'expiration' : str(datetime.utcnow() + timedelta(seconds=1800))
         },
-            app.config['SECRET_KEY'])
+            app.config['SECRET_KEY'], algorithm='HS256')
         return {'message':"The token is generated", 'token': token}, 200
     else:
         return {'message':"Unable to verify"}, 403 
 
+
+@app.route('/new_shop', methods=['POST'])
+@token_required
+def add_shop():
+    name = request.json['name']
+    shop_code = request.json['shop_code']
+    email = request.json['email']
+    password = request.json['password']
+    confirm_password = request.json['confirm_password']
+
+    if (password != confirm_password):
+        return {"message": 'The passwords provided are different'}, 400
+    
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        user = User(email=email, password=password, is_manager=False )
+        db.session.add(user)
+        db.session.commit()
+
+        shop = Shop(name=name, shop_code=shop_code, user_id=user.id)
+        db.session.add(shop)
+        db.session.commit()
+
+        return {"message": f'Shop {user.email} added.'}, 201
+    else: 
+        return {"message": 'Shop already exists'}, 409
     
 
 
