@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, session
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -150,6 +150,12 @@ def add_shop():
     else: 
         return {"message": 'Shop already exists'}, 409
     
+
+@app.route('/shops_list')
+def shops_list():
+    shops_data=Shop.query.all()
+    shops=[{'id': shop.id, 'name': shop.name, 'shop_code': shop.shop_code, 'user_id':shop.user_id} for shop in shops_data]  
+    return {'shops': shops}, 200
 
 
 
