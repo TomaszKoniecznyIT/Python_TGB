@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, session
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -156,6 +156,13 @@ def get_shops_list():
     shops_data=Shop.query.all()
     shops=[{'id': shop.id, 'name': shop.name, 'shop_code': shop.shop_code, 'user_id':shop.user_id} for shop in shops_data]  
     return {'shops': shops}, 200
+
+
+@app.route('/shops/<int:shopId>')
+def get_shop(shopId):
+    shop_data = db.session.query(Shop, User).join(User).filter(Shop.id == shopId).first()
+    shop = {'id': shop_data.Shop.id, 'name': shop_data.Shop.name, 'shop_code': shop_data.Shop.shop_code, 'user_id':shop_data.Shop.user_id, "email":shop_data.User.email}
+    return {'shop':shop}, 200
 
 
 @app.route('/shops_targets')
