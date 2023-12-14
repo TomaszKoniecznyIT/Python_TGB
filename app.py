@@ -180,6 +180,21 @@ def get_shops_targets():
     return {'targets': targets}, 200
 
 
+@app.route('/shops/<int:shopId>/sale/<string:day>')
+def get_shop_daily_sale(shopId, day):
+    date = datetime.strptime(day, "%Y-%m-%d")
+
+    shop_sale = db.session.query(Shop, Sale).outerjoin(Sale).filter(Shop.id == shopId, Sale.day == date).first()
+    
+    if (shop_sale):
+        sale = {'id': shop_sale.Shop.id, 'name': shop_sale.Shop.name, 'shop_code': shop_sale.Shop.shop_code, 'day': shop_sale.Sale.day, 'total': shop_sale.Sale.total}
+    else: 
+        return {'sales': {"id": shopId, "total":0 }}
+    
+    return {"sale":sale}, 200
+  
+
+
 
 # creating tables in the database
 # with app.app_context():
