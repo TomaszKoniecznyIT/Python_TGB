@@ -189,7 +189,7 @@ def get_shop_daily_sale(shopId, day):
     if (shop_sale):
         sale = {'id': shop_sale.Shop.id, 'name': shop_sale.Shop.name, 'shop_code': shop_sale.Shop.shop_code, 'day': shop_sale.Sale.day, 'total': shop_sale.Sale.total}
     else: 
-        return {'sales': {"id": shopId, "total":0 }}
+        return {'sale': {"id": shopId, "total":0, 'day': day }}
     
     return {"sale":sale}, 200
   
