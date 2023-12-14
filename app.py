@@ -165,19 +165,19 @@ def get_shop(shopId):
     return {'shop':shop}, 200
 
 
-@app.route('/shops_targets')
-def get_shops_targets():
-    shops_targets_data = db.session.query(Shop, Target).join(Target)
-    targets = [{
-        'id': shop.id,
-        'name': shop.name,
-        'shop_code': shop.shop_code,
-        'user_id':shop.user_id,
-        'target_id': target.id,
-        'month':target.month,
-        'target':target.target
-    } for shop, target in shops_targets_data]
-    return {'targets': targets}, 200
+# @app.route('/shops_targets')
+# def get_shops_targets():
+#     shops_targets_data = db.session.query(Shop, Target).join(Target)
+#     targets = [{
+#         'id': shop.id,
+#         'name': shop.name,
+#         'shop_code': shop.shop_code,
+#         'user_id':shop.user_id,
+#         'target_id': target.id,
+#         'month':target.month,
+#         'target':target.target
+#     } for shop, target in shops_targets_data]
+#     return {'targets': targets}, 200
 
 
 @app.route('/shops/<int:shopId>/sale/<string:day>')
@@ -192,6 +192,22 @@ def get_shop_daily_sale(shopId, day):
         return {'sale': {"id": shopId, "total":0, 'day': day }}
     
     return {"sale":sale}, 200
+
+
+@app.route('/shops/sale', methods=['POST'])
+@token_required
+def add_shop_daily_sale():
+    day = datetime.strptime(request.json['date'], "%Y-%m-%d")
+    total = request.json['number']
+    id_shop = request.json['id']
+
+    sale = Sale(day=day, total=total, id_shop = id_shop)
+    db.session.add(sale)
+    db.session.commit()
+
+    return {"message": 'added sales'}, 201
+
+
   
 
 
