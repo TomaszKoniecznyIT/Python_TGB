@@ -51,8 +51,7 @@ class User(db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-    def __repr__(self) -> str:
-        return f'User email: {self.email} password: {self.password_hash}'
+
     
 
 class Shop(db.Model):
@@ -61,8 +60,7 @@ class Shop(db.Model):
     shop_code = db.Column(db.String(15), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    def __repr__(self) -> str:
-        return f'Shop: {self.name}'
+
 
 
 class Target(db.Model):
@@ -71,8 +69,7 @@ class Target(db.Model):
     target = db.Column(db.Float,nullable=False)
     id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
 
-    def __repr__(self) -> str:
-        return f'Target: {self.target} Month: {self.month}'
+
 
 
 class Sale(db.Model):
@@ -81,8 +78,7 @@ class Sale(db.Model):
     total = db.Column(db.Float, nullable=False)
     id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
 
-    def __repr__(self) -> str:
-        return f'Day: {self.day} total: {self.total}'
+
 
 
 @app.route('/users/signup', methods=['POST'])
@@ -190,23 +186,33 @@ def get_shop_daily_sale(shopId):
     if (shop_sale):
         sale = {'id': shop_sale.Shop.id, 'name': shop_sale.Shop.name, 'shop_code': shop_sale.Shop.shop_code, 'day': shop_sale.Sale.day.strftime("%Y-%m-%d"), 'total': shop_sale.Sale.total}
     else: 
-        return {'sale': {"id": shopId, "total":0, 'day': day }}
+        return {'sale':None}
     
     return {"sale":sale}, 200
 
 
-@app.route('/shops/sale', methods=['POST'])
+@app.route('/shops/sale', methods=['PUT'])
 @token_required
 def add_shop_daily_sale():
-    day = datetime.strptime(request.json['date'], "%Y-%m-%d")
-    total = request.json['number']
-    id_shop = request.json['id']
+    date = datetime.strptime(request.json['date'], "%Y-%m-%d")
+    number = float(request.json['number'])
+    id = int(request.json['id'])
+    
 
-    sale = Sale(day=day, total=total, id_shop = id_shop)
-    db.session.add(sale)
-    db.session.commit()
+    sale_for_update = db.session.query(Sale).filter(Sale.id_shop==id, Sale.day==date).first()
 
-    return {"message": 'added sales'}, 201
+    if(sale_for_update):
+        sale_id = sale_for_update.id
+        sale= db.session.query(Sale).get(sale_id)
+        sale.total = number
+        db.session.commit()
+        return {"message": 'updated sales'}, 200
+        
+    else:
+        new_sale = Sale(day=date, total=number, id_shop=id)
+        db.session.add(new_sale)
+        db.session.commit()
+        return {"message": 'added sales'}, 201
 
 
   
