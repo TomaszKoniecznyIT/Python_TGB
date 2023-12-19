@@ -196,8 +196,7 @@ def get_shop_daily_sale(shopId):
 def add_shop_daily_sale():
     date = datetime.strptime(request.json['date'], "%Y-%m-%d")
     number = float(request.json['number'])
-    id = int(request.json['id'])
-    
+    id = int(request.json['id'])   
 
     sale_for_update = db.session.query(Sale).filter(Sale.id_shop==id, Sale.day==date).first()
 
@@ -228,7 +227,30 @@ def get_shop_monthly_target(shopId):
         return {'target':None}
     
     return {"target": target}, 200
-  
+
+
+@app.route('/shops/target', methods=['PUT'])
+@token_required
+def add_shop_monthly_target():
+    date = datetime.strptime(request.json['month'], "%Y-%m")
+    target = float(request.json['number'])
+    id = int(request.json['id'])
+    
+
+    target_for_update = db.session.query(Target).filter(Target.id_shop==id, Target.month==date).first()
+
+    if(target_for_update):
+        target_id = target_for_update.id
+        target= db.session.query(Target).get(target_id)
+        target.target = target
+        db.session.commit()
+        return {"message": 'updated target'}, 200
+        
+    else:
+        new_target = Target(month=date, target=target, id_shop=id)
+        db.session.add(new_target)
+        db.session.commit()
+        return {"message": 'added target'}, 201
 
 
 
