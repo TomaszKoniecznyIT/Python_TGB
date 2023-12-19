@@ -215,6 +215,19 @@ def add_shop_daily_sale():
         return {"message": 'added sales'}, 201
 
 
+@app.route('/shops/<int:shopId>/target')
+def get_shop_monthly_target(shopId):
+    month = request.args.get('month')
+    date = datetime.strptime(month, "%Y-%m")
+
+    shop_target = db.session.query(Shop, Target).outerjoin(Target).filter(Shop.id == shopId, Target.month == date).first()
+    
+    if (shop_target):
+        target = {'id': shop_target.Shop.id, 'name': shop_target.Shop.name, 'shop_code': shop_target.Shop.shop_code, 'month': shop_target.Target.month.strftime("%Y-%m"), 'target': shop_target.Target.target}
+    else: 
+        return {'target':None}
+    
+    return {"target": target}, 200
   
 
 
