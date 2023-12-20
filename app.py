@@ -161,19 +161,12 @@ def get_shop(shopId):
     return {'shop':shop}, 200
 
 
-# @app.route('/shops_targets')
-# def get_shops_targets():
-#     shops_targets_data = db.session.query(Shop, Target).join(Target)
-#     targets = [{
-#         'id': shop.id,
-#         'name': shop.name,
-#         'shop_code': shop.shop_code,
-#         'user_id':shop.user_id,
-#         'target_id': target.id,
-#         'month':target.month,
-#         'target':target.target
-#     } for shop, target in shops_targets_data]
-#     return {'targets': targets}, 200
+@app.route('/shops/email/<string:email>')
+def get_shop_by_email(email):
+    shop_data = db.session.query(Shop, User).join(User).filter(User.email == email).first()
+    shop = {'id': shop_data.Shop.id, 'name': shop_data.Shop.name, 'shop_code': shop_data.Shop.shop_code, 'user_id':shop_data.Shop.user_id, "email":shop_data.User.email}
+    return {'shop':shop}, 200
+
 
 
 @app.route('/shops/<int:shopId>/sale')
@@ -241,8 +234,8 @@ def add_shop_monthly_target():
 
     if(target_for_update):
         target_id = target_for_update.id
-        target= db.session.query(Target).get(target_id)
-        target.target = target
+        target_update= db.session.query(Target).get(target_id)
+        target_update.target = target
         db.session.commit()
         return {"message": 'updated target'}, 200
         
