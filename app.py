@@ -164,7 +164,11 @@ def get_shop(shopId):
 @app.route('/shops/email/<string:email>')
 def get_shop_by_email(email):
     shop_data = db.session.query(Shop, User).join(User).filter(User.email == email).first()
-    shop = {'id': shop_data.Shop.id, 'name': shop_data.Shop.name, 'shop_code': shop_data.Shop.shop_code, 'user_id':shop_data.Shop.user_id, "email":shop_data.User.email}
+    if shop_data is not None:
+        shop = {'id': shop_data.Shop.id, 'name': shop_data.Shop.name, 'shop_code': shop_data.Shop.shop_code, 'user_id':shop_data.Shop.user_id, "email":shop_data.User.email}
+    else: 
+        return {'shop': None}
+
     return {'shop':shop}, 200
 
 
