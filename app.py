@@ -250,6 +250,21 @@ def add_shop_monthly_target():
         return {"message": 'added target'}, 201
 
 
+@app.route('/report/<int:shopId>/month')
+def report_for_shop(shopId):
+    # month = request.args.get('month')
+    # start_date = datetime.strptime(month, "%Y-%m")
+
+    start_date = datetime(2023, 12, 1)
+    end_date = datetime(2023,12,12)
+
+    shop_data = Sale.query.filter(Sale.id_shop == shopId, Sale.day.between(start_date, end_date)).all()
+
+    shop_sale = [{"day": record.day, "total":record.total, "shopId": record.id_shop} for record in shop_data]
+
+    return {"report": shop_sale}, 200
+
+
 
 # creating tables in the database
 # with app.app_context():
