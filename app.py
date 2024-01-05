@@ -260,7 +260,7 @@ def report_for_shop(shopId):
 
     shop_data = Sale.query.filter(Sale.id_shop == shopId, Sale.day.between(start_date, end_date)).all()
 
-    shop_sale = [{"day": record.day, "total":record.total, "shopId": record.id_shop} for record in shop_data]
+    shop_sale = [{"id":record.id, "day": record.day, "total":record.total, "shopId": record.id_shop} for record in shop_data]
 
     return {"report": shop_sale}, 200
 
