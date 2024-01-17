@@ -1,12 +1,13 @@
 import os
+import jwt
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
 from datetime import datetime, timedelta
+from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 load_dotenv()
 
@@ -52,15 +53,11 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
     
 
-    
-
 class Shop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     shop_code = db.Column(db.String(15), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-
 
 
 class Target(db.Model):
@@ -70,15 +67,11 @@ class Target(db.Model):
     id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
 
 
-
-
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
     id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
-
-
 
 
 @app.route('/users/signup', methods=['POST'])
@@ -172,7 +165,6 @@ def get_shop_by_email(email):
     return {'shop':shop}, 200
 
 
-
 @app.route('/shops/<int:shopId>/sale')
 def get_shop_daily_sale(shopId):
     day = request.args.get('day')
@@ -233,7 +225,6 @@ def add_shop_monthly_target():
     target = float(request.json['number'])
     id = int(request.json['id'])
     
-
     target_for_update = db.session.query(Target).filter(Target.id_shop==id, Target.month==date).first()
 
     if(target_for_update):
@@ -265,8 +256,5 @@ def report_for_shop(shopId):
     return {"report": shop_sale}, 200
 
 
-
-# creating tables in the database
-# with app.app_context():
-    # from app import db
-    # db.create_all()
+if __name__ == "__main__":
+    app.run()
