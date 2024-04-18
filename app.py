@@ -105,7 +105,7 @@ def login_user():
         token = jwt.encode({
             'user': email,
             'is_manager': user.is_manager,
-            'expiration' : str(datetime.utcnow() + timedelta(seconds=1800))
+            'expiration' : str(datetime.utcnow() + timedelta(seconds=6600))
         },
             app.config['SECRET_KEY'], algorithm='HS256')
         return {'message':"The token is generated", 'token': token}, 200
