@@ -74,6 +74,11 @@ class Sale(db.Model):
     id_shop = db.Column(db.Integer, db.ForeignKey('shop.id'), nullable=False)
 
 
+@app.route('/')
+def hello():
+    return "hello"
+
+
 @app.route('/users/signup', methods=['POST'])
 def add_user():
     email = request.json['email']
